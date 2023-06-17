@@ -13,8 +13,7 @@ To deploy this project run
   git init
   git clone git@github.com:itsmisce/control-ftp.git
 
-  npm i fs
-  npm i moment
+  npm i fs moment
 
   npm start //run proyect
 ```
