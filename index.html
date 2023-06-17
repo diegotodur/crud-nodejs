@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="./src/style.css">
+
+    <title>Ejercicio</title>
+</head>
+
+<body>
+    <div class="card">
+        <form action="http://localhost:8080/crear">
+            <label for="nombre1">Nombre del archivo:</label>
+            <input type="text" name="nombre" id="nombre1" />
+            <br />
+            <label for="contenido">Contenido:</label>
+            <textarea name="contenido" id="contenido"></textarea>
+            <br />
+            <button class="btn btn-primary" type="submit">Crear</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <form action="http://localhost:8080/leer">
+            <label for="nombre2">Nombre del archivo:</label>
+            <input type="text" name="nombre" id="nombre2" />
+            <br />
+            <button class="btn btn-primary" type="submit">Leer</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <form action="http://localhost:8080/renombrar">
+            <label for="nombre3">Nombre del archivo:</label>
+            <input type="text" name="nombre" id="nombre3" />
+            <label for="nuevo_nombre">Nuevo nombre:</label>
+            <input type="text" name="nuevo_nombre" id="nuevo_nombre" />
+            <br />
+            <button class="btn btn-primary" type="submit">Renombrar</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <form action="http://localhost:8080/eliminar">
+            <label for="nombre4">Nombre del archivo:</label>
+            <input type="text" name="nombre" id="nombre4" />
+            <br />
+            <button class="btn btn-primary" type="submit">Eliminar</button>
+        </form>
+    </div>
+</body>
+
+</html>
