@@ -15,6 +15,6 @@ To deploy this project run
   npm i fs
   npm i moment
 
-  node index.js //run proyect
+  node src/index.js //run proyect
 ```
 
