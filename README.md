@@ -13,7 +13,7 @@ To deploy this project run
   git init
   git clone git@github.com:itsmisce/control-ftp.git
 
-  npm i fs moment nodemon jimp
+  npm i fs moment nodemon
 
   npm start dev //run proyect
 ```

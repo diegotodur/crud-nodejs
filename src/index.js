@@ -2,14 +2,23 @@ const http = require("http");
 const url = require("url");
 const fs = require("fs");
 const moment = require("moment")
-const jimp = require("jimp");
 const path = require("path")
 
-
-const errorHTML = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Error</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background-color:#f5f5f5;font-family:Arial,sans-serif}.error-message{font-size:24px;margin-bottom:16px}.error-image{font-size:64px;margin-bottom:16px}</style></head><body><div class="error-message">Ups, algo ocurrió mal</div><div class="error-image">😕</div></body></html>`;
-const noexisteHTML = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Error</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background-color:#f5f5f5;font-family:Arial,sans-serif}.error-message{font-size:24px;margin-bottom:16px}.error-image{font-size:64px;margin-bottom:16px}</style></head><body><div class="error-message">Ups, el archivo no existe!</div><div class="error-image">😕</div></body></html>`;
-const renombreHTML = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Error</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background-color:#f5f5f5;font-family:Arial,sans-serif}.error-message{font-size:24px;margin-bottom:16px}.error-image{font-size:64px;margin-bottom:16px}.confetti{display:flex;justify-content:center;align-items:center;position:absolute;width:100%;height:100%;overflow:hidden;z-index:1000}.confetti-piece{position:absolute;width:10px;height:30px;background:#ffd300;top:0;opacity:0}.confetti-piece:nth-child(1){left:7%;-webkit-transform:rotate(-40deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:182ms;-webkit-animation-duration:1116ms}.confetti-piece:nth-child(2){left:14%;-webkit-transform:rotate(4deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:161ms;-webkit-animation-duration:1076ms}.confetti-piece:nth-child(3){left:21%;-webkit-transform:rotate(-51deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:481ms;-webkit-animation-duration:1103ms}.confetti-piece:nth-child(4){left:28%;-webkit-transform:rotate(61deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:334ms;-webkit-animation-duration:708ms}.confetti-piece:nth-child(5){left:35%;-webkit-transform:rotate(-52deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:302ms;-webkit-animation-duration:776ms}.confetti-piece:nth-child(6){left:42%;-webkit-transform:rotate(38deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:180ms;-webkit-animation-duration:1168ms}.confetti-piece:nth-child(7){left:49%;-webkit-transform:rotate(11deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:395ms;-webkit-animation-duration:1.2s}.confetti-piece:nth-child(8){left:56%;-webkit-transform:rotate(49deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:14ms;-webkit-animation-duration:887ms}.confetti-piece:nth-child(9){left:63%;-webkit-transform:rotate(-72deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:149ms;-webkit-animation-duration:805ms}.confetti-piece:nth-child(10){left:70%;-webkit-transform:rotate(10deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:351ms;-webkit-animation-duration:1059ms}.confetti-piece:nth-child(11){left:77%;-webkit-transform:rotate(4deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:307ms;-webkit-animation-duration:1132ms}.confetti-piece:nth-child(12){left:84%;-webkit-transform:rotate(42deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:464ms;-webkit-animation-duration:776ms}.confetti-piece:nth-child(13){left:91%;-webkit-transform:rotate(-72deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:429ms;-webkit-animation-duration:818ms}.confetti-piece:nth-child(odd){background:#7431e8}.confetti-piece:nth-child(even){z-index:1}.confetti-piece:nth-child(4n){width:5px;height:12px;-webkit-animation-duration:2s}.confetti-piece:nth-child(3n){width:3px;height:10px;-webkit-animation-duration:2.5s;-webkit-animation-delay:1s}.confetti-piece:nth-child(4n-7){background:red}@-webkit-keyframes makeItRain{from{opacity:0}50%{opacity:1}to{-webkit-transform:translateY(350px)}}</style></head><body><div class="error-message">Archivo renombrado con exito!</div><div class="error-image">🥳</div><div class="confetti"><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div></div></body></html>`;
-const eliminadoHTML = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Error</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background-color:#f5f5f5;font-family:Arial,sans-serif}.error-message{font-size:24px;margin-bottom:16px}.error-image{font-size:64px;margin-bottom:16px}.confetti{display:flex;justify-content:center;align-items:center;position:absolute;width:100%;height:100%;overflow:hidden;z-index:1000}.confetti-piece{position:absolute;width:10px;height:30px;background:#ffd300;top:0;opacity:0}.confetti-piece:nth-child(1){left:7%;-webkit-transform:rotate(-40deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:182ms;-webkit-animation-duration:1116ms}.confetti-piece:nth-child(2){left:14%;-webkit-transform:rotate(4deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:161ms;-webkit-animation-duration:1076ms}.confetti-piece:nth-child(3){left:21%;-webkit-transform:rotate(-51deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:481ms;-webkit-animation-duration:1103ms}.confetti-piece:nth-child(4){left:28%;-webkit-transform:rotate(61deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:334ms;-webkit-animation-duration:708ms}.confetti-piece:nth-child(5){left:35%;-webkit-transform:rotate(-52deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:302ms;-webkit-animation-duration:776ms}.confetti-piece:nth-child(6){left:42%;-webkit-transform:rotate(38deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:180ms;-webkit-animation-duration:1168ms}.confetti-piece:nth-child(7){left:49%;-webkit-transform:rotate(11deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:395ms;-webkit-animation-duration:1.2s}.confetti-piece:nth-child(8){left:56%;-webkit-transform:rotate(49deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:14ms;-webkit-animation-duration:887ms}.confetti-piece:nth-child(9){left:63%;-webkit-transform:rotate(-72deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:149ms;-webkit-animation-duration:805ms}.confetti-piece:nth-child(10){left:70%;-webkit-transform:rotate(10deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:351ms;-webkit-animation-duration:1059ms}.confetti-piece:nth-child(11){left:77%;-webkit-transform:rotate(4deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:307ms;-webkit-animation-duration:1132ms}.confetti-piece:nth-child(12){left:84%;-webkit-transform:rotate(42deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:464ms;-webkit-animation-duration:776ms}.confetti-piece:nth-child(13){left:91%;-webkit-transform:rotate(-72deg);-webkit-animation:makeItRain 1s infinite ease-out;-webkit-animation-delay:429ms;-webkit-animation-duration:818ms}.confetti-piece:nth-child(odd){background:#7431e8}.confetti-piece:nth-child(even){z-index:1}.confetti-piece:nth-child(4n){width:5px;height:12px;-webkit-animation-duration:2s}.confetti-piece:nth-child(3n){width:3px;height:10px;-webkit-animation-duration:2.5s;-webkit-animation-delay:1s}.confetti-piece:nth-child(4n-7){background:red}@-webkit-keyframes makeItRain{from{opacity:0}50%{opacity:1}to{-webkit-transform:translateY(350px)}}</style></head><body><div class="error-message">Archivo eliminado con exito!</div><div class="error-image">🥳</div><div class="confetti"><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div><div class="confetti-piece"></div></div></body></html>`;
+function enviarHTML(res, filePath, contentType) {
+    fs.readFile(filePath, 'utf8', (err, html) => {
+      if (err) {
+        console.error(err);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.write("Error al leer el archivo HTML");
+        res.end();
+      } else {
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.write(html);
+        res.end();
+      }
+    });
+  }
+  
 
 http
     .createServer(function (req, res) {
@@ -17,147 +26,129 @@ http
         const nombre = params.nombre;
         const contenido = params.contenido;
         const nuevo_nombre = params.nuevo_nombre
-        
-        if(req.url==="/"){
+
+        if (req.url === "/") {
             res.writeHead(200, { 'Content-Type': 'text/html;charset="UTF-8"' })
-            fs.readFile("index.html",(err,response)=>{
+            fs.readFile("index.html", (err, response) => {
                 res.write(response)
                 res.end()
             })
         }
-        
-        if (req.url==="/style") {
-            fs.readFile("./src/style.css", (err, css) => {
-              if (err) {
-                res.writeHead(201, { "Content-Type": "text/plain" });
-                res.write("Error al leer css");
-                res.end();
-              } else {
-                res.writeHead(200, { "Content-Type": "text/css" });
-                res.write(css);
-                res.end();
-              }
-            });
-          }
-          
-          if (req.url === "/favicon.png") {
-            const imagePath = path.join(__dirname, 'favicon.png');
-          
-            fs.readFile(imagePath, (err, image) => {
-              if (err) {
-                res.writeHead(200, { "Content-Type": "text/plain" });
-                res.write("Error reading image file");
-                res.end();
-              } else {
-                res.writeHead(200, { "Content-Type": "image/png" });
-                res.end(image, 'binary');
-              }
-            });
-          }
-          
 
-          if (req.url.includes("/crear")) {
+        if (req.url === "/style") {
+            fs.readFile("./src/style.css", (err, css) => {
+                if (err) {
+                    res.writeHead(201, { "Content-Type": "text/plain" });
+                    res.write("Error al leer css");
+                    res.end();
+                } else {
+                    res.writeHead(200, { "Content-Type": "text/css" });
+                    res.write(css);
+                    res.end();
+                }
+            });
+        }
+
+        if (req.url === "/favicon.png") {
+            const imagePath = path.join(__dirname, 'favicon.png');
+
+            fs.readFile(imagePath, (err, image) => {
+                if (err) {
+                    res.writeHead(200, { "Content-Type": "text/plain" });
+                    res.write("Error reading image file");
+                    res.end();
+                } else {
+                    res.writeHead(200, { "Content-Type": "image/png" });
+                    res.end(image, 'binary');
+                }
+            });
+        }
+
+        if (req.url.includes("/crear")) {
             const date = moment().format('DD/MM/YYYY');
             const result = `//${date} \n ${contenido}`;
+            const filePath = path.join(__dirname, '..', 'results', nombre);
+
+            if (!fs.existsSync(filePath)) {
+                fs.writeFile(filePath, result, (err) => {
+                    if (err) {
+                        enviarHTML(res, "./html/error.html", 'text/html');
+                    } else {
+                        enviarHTML(res, "./html/exito.html", 'text/html');
+                    }
+                });
+            } else {
+                enviarHTML(res, "./html/existente.html", 'text/html');
+            }
+        }
+
+
+        if (req.url.includes('/leer')) {
+            const filePath = path.join(__dirname, '..', 'results', nombre);
+
+            if (fs.existsSync(filePath)) {
+                fs.readFile(filePath, 'utf8', (err, data) => {
+                    if (err) {
+                        const errorHTMLPath = path.join(__dirname, '..', 'html', 'error.html');
+                        enviarHTML(res, 404, errorHTMLPath);
+                    } else {
+                        const leerHTMLPath = path.join(__dirname, '..', 'html', 'leer.html');
+                        fs.readFile(leerHTMLPath, 'utf8', (err, html) => {
+                            if (err) {
+                                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                                res.write('Error al leer el archivo HTML');
+                                res.end();
+                            } else {
+                                const contenidoHTML = html.replace('{{contenido}}', data.toString());
+                                res.writeHead(200, { 'Content-Type': 'text/html' });
+                                res.write(contenidoHTML);
+                                res.end();
+                            }
+                        });
+                    }
+                });
+            } else {
+                const noExisteHTMLPath = path.join(__dirname, '..', 'html', 'no_existe.html');
+                enviarHTML(res, 404, noExisteHTMLPath);
+            }
+        }
+
+
+        if (req.url.includes("/renombrar")) {
+            const filePath = path.join(__dirname, '..', 'results', nombre);
+            const newFilePath = path.join(__dirname, '..', 'results', nuevo_nombre);
           
-            fs.writeFile(nombre, result, (err) => {
-              if (err) {
-                fs.readFile("error.html", (err, html) => {
-                  if (err) {
-                    res.writeHead(404, { 'Content-Type': 'text/plain' });
-                    res.write("Error");
-                    res.end();
-                  } else {
-                    res.writeHead(200, { 'Content-Type': 'text/html' });
-                    res.write(html);
-                    res.end();
-                  }
-                });
-              } else {
-                fs.readFile("exito.html", (err, html) => {
-                  if (err) {
-                    res.writeHead(200, { 'Content-Type': 'text/plain' });
-                    res.write("Error al leer el html");
-                    res.end();
-                  } else {
-                    res.writeHead(200, { 'Content-Type': 'text/html' });
-                    res.write(html);
-                    res.end();
-                  }
-                });
-              }
-            });
+            if (fs.existsSync(filePath)) {
+              fs.rename(filePath, newFilePath, (err) => {
+                if (err) {
+                  enviarHTML(res, "./html/error.html", 'text/html');
+                } else {
+                  enviarHTML(res, "./html/renombre.html", 'text/html');
+                }
+              });
+            } else {
+              enviarHTML(res, "./html/no_existe.html", 'text/html');
+            }
           }
           
+
+          if (req.url.includes("/eliminar")) {
+            const filePath = path.join(__dirname, '..', 'results', nombre);
           
-        if (req.url.includes("/leer")) {
-            if (fs.existsSync(nombre)) {
-                fs.readFile(nombre, (err, data) => {
-                    if (err) {
-                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.write(errorHTML);
-                        res.end();
-                    } else {
-                        const leerHTML = `<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Error</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background-color:#f5f5f5;font-family:Arial,sans-serif}.error-message{font-size:24px;margin-bottom:16px}.error-textarea{width:300px;height:200px;padding:8px;font-size:16px;border:2px solid #ccc;border-radius:4px;resize:none}</style></head><body><div class="error-message">Aqui esta su contenido:</div><textarea class="error-textarea" readonly>${data.toString()}</textarea></body></html>`;
-                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.write(leerHTML);
-                        res.end();
-                    }
-                });
+            if (fs.existsSync(filePath)) {
+              fs.unlink(filePath, (err) => {
+                if (err) {
+                  enviarHTML(res, "./html/error.html", 'text/html');
+                } else {
+                  enviarHTML(res, "./html/eliminado.html", 'text/html');
+                }
+              });
             } else {
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.write(noexisteHTML);
-                res.end();
+              enviarHTML(res, "./html/no_existe.html", 'text/html');
             }
-        }
-        
-        if (req.url.includes("/renombrar")) {
-            if (fs.existsSync(nombre)) {
-                fs.rename(nombre, nuevo_nombre, (err, data) => {
-                    if (err) { 
-                        fs.readFile
-                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.write(errorHTML);
-                        res.end();
-                    } else {
-                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.write(renombreHTML);
-                        res.end();
-                    }
-                });
-            } else {
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.write(noexisteHTML);
-                res.end();
-            }
-            setTimeout(() => {
-                console.log("asd")
-                res.writeHead(302, { 'Location': 'http://localhost:8081/' });
-                res.end();
-              }, 3000);
-        }
-        if (req.url.includes("/eliminar")) {
-
-            if (fs.existsSync(nombre)) {
-                fs.unlink(nombre, (err, data) => {
-                    if (err) {
-                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.write(errorHTML);
-                        res.end();
-                    } else {
-                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.write(eliminadoHTML);
-                        res.end();
-                    }
-                });
-            } else {
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.write(noexisteHTML);
-                res.end();
-            }
+          }
 
 
-        }
     })
     .listen(8081, () => console.log("Inicializado, escuchando el puerto 8081"));
 
