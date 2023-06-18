@@ -6,19 +6,21 @@ const path = require("path")
 
 function enviarHTML(res, filePath, contentType) {
     fs.readFile(filePath, 'utf8', (err, html) => {
-      if (err) {
-        console.error(err);
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.write("Error al leer el archivo HTML");
-        res.end();
-      } else {
-        res.writeHead(200, { 'Content-Type': contentType });
-        res.write(html);
-        res.end();
-      }
+        if (err) {
+            fs.readFile("./html/404.html", 'utf8', (err, html) => {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.write(html);
+                res.end();
+            });
+
+        } else {
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.write(html);
+            res.end();
+        }
     });
-  }
-  
+}
+
 
 http
     .createServer(function (req, res) {
@@ -34,8 +36,7 @@ http
                 res.end()
             })
         }
-
-        if (req.url === "/style") {
+        else if (req.url === "/style") {
             fs.readFile("./src/style.css", (err, css) => {
                 if (err) {
                     res.writeHead(201, { "Content-Type": "text/plain" });
@@ -48,8 +49,7 @@ http
                 }
             });
         }
-
-        if (req.url === "/favicon.png") {
+        else if (req.url === "/favicon.png") {
             const imagePath = path.join(__dirname, 'favicon.png');
 
             fs.readFile(imagePath, (err, image) => {
@@ -63,11 +63,16 @@ http
                 }
             });
         }
-
-        if (req.url.includes("/crear")) {
+        else if (req.url.includes("/crear")) {
             const date = moment().format('DD/MM/YYYY');
             const result = `//${date} \n ${contenido}`;
             const filePath = path.join(__dirname, '..', 'results', nombre);
+
+            const extensionRegex = /\.[a-zA-Z0-9]+$/;
+            if (!extensionRegex.test(nombre)) {
+                enviarHTML(res, "./html/sin_extension.html", 'text/html');
+                return;
+            }
 
             if (!fs.existsSync(filePath)) {
                 fs.writeFile(filePath, result, (err) => {
@@ -81,9 +86,7 @@ http
                 enviarHTML(res, "./html/existente.html", 'text/html');
             }
         }
-
-
-        if (req.url.includes('/leer')) {
+        else if (req.url.includes('/leer')) {
             const filePath = path.join(__dirname, '..', 'results', nombre);
 
             if (fs.existsSync(filePath)) {
@@ -112,41 +115,51 @@ http
                 enviarHTML(res, 404, noExisteHTMLPath);
             }
         }
-
-
-        if (req.url.includes("/renombrar")) {
+        else if (req.url.includes("/renombrar")) {
             const filePath = path.join(__dirname, '..', 'results', nombre);
             const newFilePath = path.join(__dirname, '..', 'results', nuevo_nombre);
-          
-            if (fs.existsSync(filePath)) {
-              fs.rename(filePath, newFilePath, (err) => {
-                if (err) {
-                  enviarHTML(res, "./html/error.html", 'text/html');
-                } else {
-                  enviarHTML(res, "./html/renombre.html", 'text/html');
-                }
-              });
-            } else {
-              enviarHTML(res, "./html/no_existe.html", 'text/html');
-            }
-          }
-          
 
-          if (req.url.includes("/eliminar")) {
-            const filePath = path.join(__dirname, '..', 'results', nombre);
-          
             if (fs.existsSync(filePath)) {
-              fs.unlink(filePath, (err) => {
+                fs.rename(filePath, newFilePath, (err) => {
+                    if (err) {
+                        enviarHTML(res, "./html/error.html", 'text/html');
+                    } else {
+                        enviarHTML(res, "./html/renombre.html", 'text/html');
+                    }
+                });
+            } else {
+                enviarHTML(res, "./html/no_existe.html", 'text/html');
+            }
+        }
+        else if (req.url.includes("/eliminar")) {
+            const filePath = path.join(__dirname, '..', 'results', nombre);
+
+            if (fs.existsSync(filePath)) {
+                fs.unlink(filePath, (err) => {
+                    if (err) {
+                        enviarHTML(res, "./html/error.html", 'text/html');
+                    } else {
+                        enviarHTML(res, "./html/eliminado.html", 'text/html');
+                    }
+                });
+            } else {
+                enviarHTML(res, "./html/no_existe.html", 'text/html');
+            }
+        }
+        else{
+            fs.readFile(path.join(__dirname, '..', 'html', '404.html'), (err, html) => {
                 if (err) {
-                  enviarHTML(res, "./html/error.html", 'text/html');
+                  console.error(err);
+                  res.writeHead(404, { 'Content-Type': 'text/plain' });
+                  res.write("Error al leer el archivo HTML");
+                  res.end();
                 } else {
-                  enviarHTML(res, "./html/eliminado.html", 'text/html');
+                  res.writeHead(200, { 'Content-Type': 'text/html;charset=UTF-8' });
+                  res.write(html);
+                  res.end();
                 }
               });
-            } else {
-              enviarHTML(res, "./html/no_existe.html", 'text/html');
-            }
-          }
+        }
 
 
     })
