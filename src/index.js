@@ -65,7 +65,12 @@ http
         }
         else if (req.url.includes("/crear")) {
             const date = moment().format('DD/MM/YYYY');
-            const result = `//${date} \n ${contenido}`;
+
+            const date0 = date
+                            .split('/')
+                            .map(segmento => segmento.padStart(2, '0'))
+                            .join('/');
+            const result = `${date0} \n ${contenido}`;
             const filePath = path.join(__dirname, '..', 'results', nombre);
 
             const extensionRegex = /\.[a-zA-Z0-9]+$/;
@@ -154,7 +159,7 @@ http
                   res.write("Error al leer el archivo HTML");
                   res.end();
                 } else {
-                  res.writeHead(200, { 'Content-Type': 'text/html;charset=UTF-8' });
+                  res.writeHead(404, { 'Content-Type': 'text/html;charset=UTF-8' });
                   res.write(html);
                   res.end();
                 }
