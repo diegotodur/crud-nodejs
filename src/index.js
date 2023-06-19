@@ -1,11 +1,59 @@
-import http from 'http';
-import url from 'url';
-import fs from 'fs';
-import moment from 'moment';
-import path from 'path';
+const http = require('http');
+const url = require('url');
+const fs = require('fs');
+const moment = require('moment');
+const path = require('path');
 
-import { sendHTML, success } from './utils.js';
+function sendHTML(res, filePath, contentType) {
+    fs.readFile(filePath, 'utf8', (err, html) => {
+        if (err) {
+            fs.readFile("./html/404.html", 'utf8', (err, html) => {
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.write(html);
+                res.end();
+            });
+
+        } else {
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.write(html);
+            res.end();
+        }
+    });
+}
+
+function success(res, mensaje, estado, emoji) {
+    let filePath = '';
   
+    switch (estado) {
+      case 'exito':
+        filePath = path.join(__dirname, '..', 'html', 'exito.html');
+        break;
+  
+      case 'error':
+        filePath = path.join(__dirname, '..', 'html', 'error.html');
+        break;
+     
+     case 'leer':
+        filePath = path.join(__dirname, '..', 'html', 'leer.html');
+        break;
+
+    }
+  
+    fs.readFile(filePath, 'utf8', (err, html) => {
+      if (err) {
+        sendHTML(res, './html/404.html', 'text/html');
+      } else {
+        const contenidoHTML = html
+                                .replace('{{contenido1}}', mensaje)
+                                .replace('{{contenido2}}', emoji);
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write(contenidoHTML);
+        res.end();
+      }
+    });
+  }
+
+
 http
     .createServer(function (req, res) {
         const params = url.parse(req.url, true).query;
@@ -54,7 +102,7 @@ http
                 .split('/')
                 .map(segmento => segmento.padStart(2, '0'))
                 .join('/');
-            const result = `${date0} \n ${contenido}`;
+            const result = `//${date0} \n ${contenido}`;
             const filePath = path.join(__dirname, '..', 'results', nombre);
 
             const extensionRegex = /\.[a-zA-Z0-9]+$/;
