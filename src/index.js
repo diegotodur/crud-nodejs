@@ -50,7 +50,7 @@ http
             });
         }
         else if (req.url === "/favicon.png") {
-            const imagePath = path.join(__dirname, 'favicon.png');
+            const imagePath = path.join(__dirname, './img/favicon.png');
 
             fs.readFile(imagePath, (err, image) => {
                 if (err) {
