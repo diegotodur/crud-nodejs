@@ -8,7 +8,7 @@ function enviarHTML(res, filePath, contentType) {
     fs.readFile(filePath, 'utf8', (err, html) => {
         if (err) {
             fs.readFile("./html/404.html", 'utf8', (err, html) => {
-                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.writeHead(404, { 'Content-Type': 'text/html' });
                 res.write(html);
                 res.end();
             });
@@ -67,9 +67,9 @@ http
             const date = moment().format('DD/MM/YYYY');
 
             const date0 = date
-                            .split('/')
-                            .map(segmento => segmento.padStart(2, '0'))
-                            .join('/');
+                .split('/')
+                .map(segmento => segmento.padStart(2, '0'))
+                .join('/');
             const result = `${date0} \n ${contenido}`;
             const filePath = path.join(__dirname, '..', 'results', nombre);
 
@@ -97,15 +97,12 @@ http
             if (fs.existsSync(filePath)) {
                 fs.readFile(filePath, 'utf8', (err, data) => {
                     if (err) {
-                        const errorHTMLPath = path.join(__dirname, '..', 'html', 'error.html');
-                        enviarHTML(res, 404, errorHTMLPath);
+                        enviarHTML(res, "./html/error.html", 'text/html');
                     } else {
                         const leerHTMLPath = path.join(__dirname, '..', 'html', 'leer.html');
                         fs.readFile(leerHTMLPath, 'utf8', (err, html) => {
                             if (err) {
-                                res.writeHead(500, { 'Content-Type': 'text/plain' });
-                                res.write('Error al leer el archivo HTML');
-                                res.end();
+                                enviarHTML(res, "./html/error.html", 'text/html');
                             } else {
                                 const contenidoHTML = html.replace('{{contenido}}', data.toString());
                                 res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -117,7 +114,15 @@ http
                 });
             } else {
                 const noExisteHTMLPath = path.join(__dirname, '..', 'html', 'no_existe.html');
-                enviarHTML(res, 404, noExisteHTMLPath);
+                fs.readFile(noExisteHTMLPath, 'utf8', (err, html) => {
+                    if (err) {
+                        enviarHTML(res, "./html/404.html", 'text/html');
+                    } else {
+                        res.writeHead(200, { 'Content-Type': 'text/html' });
+                        res.write(html);
+                        res.end();
+                    }
+                });
             }
         }
         else if (req.url.includes("/renombrar")) {
@@ -151,19 +156,16 @@ http
                 enviarHTML(res, "./html/no_existe.html", 'text/html');
             }
         }
-        else{
+        else {
             fs.readFile(path.join(__dirname, '..', 'html', '404.html'), (err, html) => {
                 if (err) {
-                  console.error(err);
-                  res.writeHead(404, { 'Content-Type': 'text/plain' });
-                  res.write("Error al leer el archivo HTML");
-                  res.end();
+                    enviarHTML(res, "./html/error.html", 'text/html');
                 } else {
-                  res.writeHead(404, { 'Content-Type': 'text/html;charset=UTF-8' });
-                  res.write(html);
-                  res.end();
+                    res.writeHead(404, { 'Content-Type': 'text/html;charset=UTF-8' });
+                    res.write(html);
+                    res.end();
                 }
-              });
+            });
         }
 
 
