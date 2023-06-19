@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Error</title>
+    <title>Lectura</title>
     <link rel="shortcut icon" href="http://localhost:8081/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <style>
@@ -22,12 +22,31 @@
             font-size: 24px;
             margin-bottom: 16px
         }
+
+        .content{
+            font-size: 20px;
+        }
+
+        .codigo{
+         max-width: 400px;
+         max-height: 400px;
+         overflow-x: auto;
+         white-space: pre;
+         font-size: 14px;
+         font-family: "Courier New", Courier, monospace;
+         color: #24292e;
+        }
+
     </style>
 </head>
 
 <body>
-    <div class="message">Contenido 🤯</div>
-    <pre class="contenido">{{contenido}}</pre>
+    <div class="message">{{contenido1}}</div>
+    <div class="codigo">
+        <code>
+              {{contenido2}}
+        </code>     
+    </div>
 </body>
 
 </html>

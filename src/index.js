@@ -1,10 +1,10 @@
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
-const moment = require("moment")
-const path = require("path")
+const moment = require("moment");
+const path = require("path");
 
-function enviarHTML(res, filePath, contentType) {
+function sendHTML(res, filePath, contentType) {
     fs.readFile(filePath, 'utf8', (err, html) => {
         if (err) {
             fs.readFile("./html/404.html", 'utf8', (err, html) => {
@@ -21,7 +21,39 @@ function enviarHTML(res, filePath, contentType) {
     });
 }
 
+function success(res, mensaje, estado, emoji) {
+    let filePath = '';
+  
+    switch (estado) {
+      case 'exito':
+        filePath = path.join(__dirname, '..', 'html', 'exito.html');
+        break;
+  
+      case 'error':
+        filePath = path.join(__dirname, '..', 'html', 'error.html');
+        break;
+     
+     case 'leer':
+        filePath = path.join(__dirname, '..', 'html', 'leer.html');
+        break;
 
+    }
+  
+    fs.readFile(filePath, 'utf8', (err, html) => {
+      if (err) {
+        sendHTML(res, './html/404.html', 'text/html');
+      } else {
+        const contenidoHTML = html
+                                .replace('{{contenido1}}', mensaje)
+                                .replace('{{contenido2}}', emoji);
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write(contenidoHTML);
+        res.end();
+      }
+    });
+  }
+
+  
 http
     .createServer(function (req, res) {
         const params = url.parse(req.url, true).query;
@@ -75,20 +107,20 @@ http
 
             const extensionRegex = /\.[a-zA-Z0-9]+$/;
             if (!extensionRegex.test(nombre)) {
-                enviarHTML(res, "./html/sin_extension.html", 'text/html');
+                success(res,`Favor agregar extension a ${nombre}`, "error", "🙄")
                 return;
             }
 
             if (!fs.existsSync(filePath)) {
                 fs.writeFile(filePath, result, (err) => {
                     if (err) {
-                        enviarHTML(res, "./html/error.html", 'text/html');
+                        sendHTML(res, './html/404.html', 'text/html');
                     } else {
-                        enviarHTML(res, "./html/exito.html", 'text/html');
+                        success(res,`Archivo ${nombre} creado exitosamente!`, "exito", "🥳")
                     }
                 });
             } else {
-                enviarHTML(res, "./html/existente.html", 'text/html');
+                success(res,`Archivo ${nombre} ya existe!`, "error", "🙄")
             }
         }
         else if (req.url.includes('/leer')) {
@@ -97,32 +129,14 @@ http
             if (fs.existsSync(filePath)) {
                 fs.readFile(filePath, 'utf8', (err, data) => {
                     if (err) {
-                        enviarHTML(res, "./html/error.html", 'text/html');
+                        sendHTML(res, './html/404.html', 'text/html');
                     } else {
-                        const leerHTMLPath = path.join(__dirname, '..', 'html', 'leer.html');
-                        fs.readFile(leerHTMLPath, 'utf8', (err, html) => {
-                            if (err) {
-                                enviarHTML(res, "./html/error.html", 'text/html');
-                            } else {
-                                const contenidoHTML = html.replace('{{contenido}}', data.toString());
-                                res.writeHead(200, { 'Content-Type': 'text/html' });
-                                res.write(contenidoHTML);
-                                res.end();
-                            }
-                        });
+                        success(res,`Contenido de ${nombre}`, "leer", data.toString() )
                     }
                 });
             } else {
-                const noExisteHTMLPath = path.join(__dirname, '..', 'html', 'no_existe.html');
-                fs.readFile(noExisteHTMLPath, 'utf8', (err, html) => {
-                    if (err) {
-                        enviarHTML(res, "./html/404.html", 'text/html');
-                    } else {
-                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.write(html);
-                        res.end();
-                    }
-                });
+                success(res,`Archivo ${nombre} no existe!`, "error", "🥴")
+
             }
         }
         else if (req.url.includes("/renombrar")) {
@@ -132,13 +146,14 @@ http
             if (fs.existsSync(filePath)) {
                 fs.rename(filePath, newFilePath, (err) => {
                     if (err) {
-                        enviarHTML(res, "./html/error.html", 'text/html');
+                        sendHTML(res, "./html/404.html", 'text/html');
                     } else {
-                        enviarHTML(res, "./html/renombre.html", 'text/html');
+                        success(res,`Archivo ${nombre} renombrado a ${nuevo_nombre}!`, "exito", "🥳")
+
                     }
                 });
             } else {
-                enviarHTML(res, "./html/no_existe.html", 'text/html');
+                success(res,`Archivo ${nombre} no existe!`, "error", "🥴")
             }
         }
         else if (req.url.includes("/eliminar")) {
@@ -147,25 +162,18 @@ http
             if (fs.existsSync(filePath)) {
                 fs.unlink(filePath, (err) => {
                     if (err) {
-                        enviarHTML(res, "./html/error.html", 'text/html');
+                        sendHTML(res, "./html/404.html", 'text/html');
                     } else {
-                        enviarHTML(res, "./html/eliminado.html", 'text/html');
+                        success(res,`Archivo ${nombre} eliminado correctamente!`, "exito", "🥳")
+
                     }
                 });
             } else {
-                enviarHTML(res, "./html/no_existe.html", 'text/html');
+                success(res,`Archivo ${nombre} no existe!`, "error", "🥴")
             }
         }
         else {
-            fs.readFile(path.join(__dirname, '..', 'html', '404.html'), (err, html) => {
-                if (err) {
-                    enviarHTML(res, "./html/error.html", 'text/html');
-                } else {
-                    res.writeHead(404, { 'Content-Type': 'text/html;charset=UTF-8' });
-                    res.write(html);
-                    res.end();
-                }
-            });
+            sendHTML(res, "./html/404.html", 'text/html');
         }
 
 
