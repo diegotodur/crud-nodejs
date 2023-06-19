@@ -13,7 +13,7 @@ To deploy this project run
 
 ```bash
   git init
-  git clone git@github.com:itsmisce/control-ftp.git
+  git clone git@github.com:itsmisce/crud-nodejs.git
 
   npm i fs moment nodemon
 
