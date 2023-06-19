@@ -2,6 +2,7 @@
   "name": "ejercicio",
   "version": "1.0.0",
   "description": "Crear, editar, renombrar y eliminar archivos usando servidores y node js",
+  "type": "module",
   "main": "/src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
