@@ -1,7 +1,7 @@
 
 # Control File System
 
-Crear, editar, renombrar y eliminar archivos usando servidores y node js
+Crear, editar, renombrar y eliminar archivos usando servidores, express y node js
 
 ![Main Page](https://github.com/itsmisce/control-ftp/blob/main/src/img/main.png)
 
