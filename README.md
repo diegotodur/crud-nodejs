@@ -15,7 +15,7 @@ To deploy this project run
   git init
   git clone git@github.com:itsmisce/crud-nodejs.git
 
-  npm i fs moment nodemon
+  npm i moment nodemon express
 
   npm start dev
   open http://localhost:8081/
