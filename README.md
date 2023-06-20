@@ -12,7 +12,6 @@ animations by [zer0kool](https://codepen.io/zer0kool/pen/KjZWRW)
 To deploy this project run
 
 ```bash
-  git init
   git clone git@github.com:itsmisce/crud-nodejs.git
 
   npm i moment nodemon express
